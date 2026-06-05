@@ -6,7 +6,7 @@ CitySystem, opisany w [`CLAUDE.md`](CLAUDE.md) oraz wspólnym [`../CLAUDE.md`](.
 
 | | |
 |---|---|
-| **Wersja** | 0.2.0 |
+| **Wersja** | 0.3.0 |
 | **Platforma** | Paper 1.21.x |
 | **Java** | 21 |
 | **Plik wtyczki** | `paper-plugin.yml` (Paper plugin loader) |
@@ -44,19 +44,34 @@ CitySystem, opisany w [`CLAUDE.md`](CLAUDE.md) oraz wspólnym [`../CLAUDE.md`](.
 
 ## 3. Komendy
 
-_Brak — szkielet startowy. Lista będzie uzupełniana wraz z funkcjami (komendy rejestrowane przez kod,
-nie w `paper-plugin.yml`)._
+Komendy rejestrowane przez kod (nie w `paper-plugin.yml`). Aliasy subkomend są tłumaczalne
+(`Translations/{pl,en}.yml`, sekcja `commands.subcommands.<name>.aliases`).
+
+### `/klasa` (aliasy `/klasy`, `/class`)
+
+| Komenda | Działanie |
+|---|---|
+| `/klasa` lub `/klasa pomoc` | Lista dostępnych komend, filtrowana wg uprawnień gracza. |
+| `/klasa reload` | Przeładowanie configu i tłumaczeń bez restartu serwera. |
 
 ## 4. Permissions
 
-_Brak — uzupełniane wraz z komendami. Konwencja prefiksu: `ClassSystem.<...>`._
+Prefiks: `ClassSystem.<...>`. Domyślnie: `true` = wszyscy, `op` = operatorzy.
+
+| Permission | Domyślnie | Opis |
+|---|---|---|
+| `ClassSystem.help` | `true` | Dostęp do `/klasa` i `/klasa pomoc`. Brak = brak dostępu do dispatcha. |
+| `ClassSystem.reload` | `op` | `/klasa reload`. |
 
 ## 5. Konfiguracja
 
 Plik `plugins/ClassSystem/config.yml`. Sekcje: `general` (enabled, language), `database`
-(type, table-prefix, sqlite), `debug`. Komentarze przy kluczach w samym pliku.
+(type, table-prefix, sqlite), `debug` (enabled, log-database-operations). Komentarze przy kluczach
+w samym pliku. Pole `configVersion` jest zarządzane automatycznie przez `ConfigMigrator` — przy bumpie
+wersji nowe klucze dolewają się, zachowując ustawienia operatora (backup `config.yml.backup-<ts>`).
 
 ## 6. Tłumaczenia
 
 Pliki `plugins/ClassSystem/Translations/{pl,en}.yml`, wybór przez `general.language`.
-Brakujący klucz w aktywnym języku → fallback do `pl.yml`.
+Brakujący klucz w aktywnym języku → fallback do `pl.yml`. Klucze: `prefix`, `info.*`, `errors.*`,
+`commands.*` (nazwa głównej komendy, aliasy, opisy + aliasy subkomend).

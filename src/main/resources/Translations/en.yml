@@ -1,12 +1,35 @@
 # Translations (EN) — ClassSystem.
 # Keys: English, dotted hierarchy. A missing key falls back to pl.yml.
+# configVersion: do not edit manually (ConfigMigrator merges new keys on bump).
+configVersion: 0.3.0
 
 prefix: "&8[&bClassSystem&8]&r "
 
 info:
-  reloaded: "Configuration reloaded."
+  reloaded: "&aConfiguration reloaded."
+  help-header: "&8——————[ &bClassSystem &8]——————"
+  help-entry: "&e{usage} &7- &f{description}"
 
 errors:
-  no-permission: "You don't have permission for this command."
+  no-permission-command: "&cYou don't have permission for this command."
+  system-disabled: "&cThe class system is currently disabled."
+  invalid-arguments: "&cInvalid arguments. Use &e/klasa help&c."
+  internal-error: "&cAn internal error occurred. Check the console / logs."
 
-commands: {}
+commands:
+  main: klasa
+  aliases:
+    - klasy
+    - class
+  description: "Character class management"
+  subcommands:
+    help:
+      aliases:
+        - help
+        - pomoc
+      description: "Shows the list of available commands"
+    reload:
+      aliases:
+        - reload
+        - przeladuj
+      description: "Reloads config and translations"

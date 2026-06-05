@@ -33,7 +33,16 @@ Drzewo pakietów `cronos.classsystem.*` (rośnie wraz z funkcjami; konwencja war
 
 ```
 cronos.classsystem
-├── ClassSystemPlugin        — główna klasa, lifecycle + singleton getInstance()
+├── ClassSystemPlugin        — główna klasa, lifecycle, singleton, sendMessage/getMessage
+├── config/
+│   ├── MessagesConfigLoader — I/O tłumaczeń (Translations/<lang>.yml) + fallback pl.yml
+│   ├── ConfigManager        — getMessage(NoPrefix)/listy, kolory, aliasy+opisy komend, ustawienia
+│   └── ConfigMigrator       — auto-migracja config.yml + Translations po configVersion (deep-merge + backup)
+├── commands/
+│   ├── ClassMainCommand     — dispatch root /klasa (alias→primary, permission gate, tab-complete)
+│   ├── ArgumentParser       — parseInt/parsePositiveDouble/requireMinArgs z komunikatem błędu
+│   ├── base/                — AbstractCommand (self-register), Subcommand, AbstractSubcommand
+│   └── subcommands/         — HelpSubcommand, ReloadSubcommand
 └── utils/
     ├── ColoredLogger        — kolorowe logi ANSI (banner, sekcje, statusy ✓/✗/⚠)
     ├── DebugLogger          — verbose diagnostyka gated debug.enabled (singleton, kategorie)
@@ -55,6 +64,24 @@ wzorować na `CitySystem/docs/ARCHITECTURE.md` (sekcja Lifecycle).
 | `ColoredLogger` | User-facing INFO/WARN/SEVERE z ANSI. `infoIfNotDebug()` (cicho gdy debug on), `infoAlways()` (banner). |
 | `DebugLogger` | Verbose diagnostyka gated `debug.enabled`; `debugService/Command/Event/Database/...`, `debugException`. |
 | `ErrorLogFileWriter` | Plik-only `logs/errors-YYYY-MM-DD.log`: łapie WARNING+SEVERE z `plugin.getLogger()` (JUL Handler) oraz wszystkie `DebugLogger.debugException` (zawsze, niezależnie od `debug.enabled`). Dzienna rotacja, append, thread-safe. |
+
+### Konfiguracja i tłumaczenia
+
+`ConfigManager` jest jedynym punktem dostępu do wiadomości i ustawień. `MessagesConfigLoader` ładuje
+`Translations/<general.language>.yml` z fallbackiem do `pl.yml` dla brakujących kluczy. `ConfigMigrator`
+(odpalany w `onEnable` PRZED `ConfigManager.loadConfigs()`) deep-merge'uje user-pliki z bundled wg pola
+`configVersion`: bundled jako szablon (komentarze, nowe defaulty), wartości usera nadpisują liście,
+user-extras zachowane, backup przed zapisem. Wysyłka do gracza: `plugin.sendMessage(recipient, key, "{token}", val)`
+— prefiks doklejany do pierwszej linii, wsparcie list, kody `&` tłumaczone.
+
+### Komendy
+
+`/klasa` (`ClassMainCommand extends AbstractCommand`) samorejestruje się przez refleksję na `CommandMap`.
+Subkomendy implementują `Subcommand` (przez `AbstractSubcommand`) i są rejestrowane z tłumaczalnymi
+aliasami (`commands.subcommands.<name>.aliases`); `aliasToPrimary` mapuje wejście usera → nazwa kanoniczna
+do sprawdzenia permission `ClassSystem.<name>`. Dodanie subkomendy: (a) klasa `extends AbstractSubcommand`,
+(b) rejestracja w `ClassMainCommand.registerSubcommands()`, (c) wpisy `aliases`+`description` w obu
+`Translations/*.yml`.
 
 ## 3. Build i CI
 

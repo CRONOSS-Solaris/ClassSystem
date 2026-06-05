@@ -1,14 +1,39 @@
 # Tłumaczenia (PL) — ClassSystem.
 # Klucze: angielskie, hierarchia kropkowa. Wartości: po polsku.
 # Brakujący klucz w aktywnym języku → fallback do pl.yml.
+# configVersion: nie edytować ręcznie (ConfigMigrator dolewa nowe klucze przy bumpie).
+configVersion: 0.3.0
 
+# Prefiks doklejany do pierwszej linii wiadomości wysyłanych przez plugin.sendMessage.
 prefix: "&8[&bClassSystem&8]&r "
 
 info:
-  reloaded: "Konfiguracja przeładowana."
+  reloaded: "&aKonfiguracja przeładowana."
+  help-header: "&8——————[ &bClassSystem &8]——————"
+  # {usage} = np. /klasa reload, {description} = opis subkomendy
+  help-entry: "&e{usage} &7- &f{description}"
 
 errors:
-  no-permission: "Nie masz uprawnień do tej komendy."
+  no-permission-command: "&cNie masz uprawnień do tej komendy."
+  system-disabled: "&cSystem klas jest aktualnie wyłączony."
+  invalid-arguments: "&cNieprawidłowe argumenty. Użyj &e/klasa pomoc&c."
+  internal-error: "&cWystąpił wewnętrzny błąd. Sprawdź konsolę / logi."
 
-# Meta-dane komend — aliasy tłumaczalne (pl: ..., en: ...).
-commands: {}
+# Meta-dane komend. Aliasy są tłumaczalne — pierwszy alias jest nazwą domyślną w usage.
+commands:
+  main: klasa
+  aliases:
+    - klasy
+    - class
+  description: "Zarządzanie klasami postaci"
+  subcommands:
+    help:
+      aliases:
+        - pomoc
+        - help
+      description: "Wyświetla listę dostępnych komend"
+    reload:
+      aliases:
+        - reload
+        - przeladuj
+      description: "Przeładowuje config i tłumaczenia"

@@ -1,15 +1,23 @@
 package cronos.classsystem;
 
+import cronos.classsystem.commands.ClassMainCommand;
+import cronos.classsystem.config.ConfigManager;
+import cronos.classsystem.config.ConfigMigrator;
 import cronos.classsystem.utils.ColoredLogger;
 import cronos.classsystem.utils.DebugLogger;
 import cronos.classsystem.utils.ErrorLogFileWriter;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.List;
 
 public class ClassSystemPlugin extends JavaPlugin {
 
     private static ClassSystemPlugin instance;
 
     private ColoredLogger coloredLogger;
+    private ConfigManager configManager;
 
     /**
      * Singleton ustawiany w {@link #onEnable()} — bezpieczny do użycia z serwisów
@@ -23,16 +31,18 @@ public class ClassSystemPlugin extends JavaPlugin {
         return coloredLogger;
     }
 
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
 
-        // Zapis domyślnego config.yml zanim cokolwiek czyta debug.enabled.
+        // config.yml musi istnieć zanim cokolwiek czyta debug.enabled.
         saveDefaultConfig();
 
         coloredLogger = new ColoredLogger(this);
-
-        // Plik-only logger błędów (logs/errors-YYYY-MM-DD.log) + JUL Handler na WARNING+SEVERE.
         ErrorLogFileWriter.initialize(this);
         DebugLogger.initialize(this);
 
@@ -44,7 +54,16 @@ public class ClassSystemPlugin extends JavaPlugin {
         coloredLogger.infoIfNotDebug("API Version: " + getDescription().getAPIVersion());
         coloredLogger.infoIfNotDebug("Kolory ANSI: " + (coloredLogger.isAnsiEnabled() ? "✓ Włączone" : "✗ Wyłączone"));
 
-        // TODO: inicjalizacja serwisów / bazy / komend wraz z rozwojem pluginu.
+        // Auto-migracja config.yml + Translations przy bumpie configVersion.
+        new ConfigMigrator(this).migrateAll();
+
+        configManager = new ConfigManager(this);
+        configManager.loadConfigs();
+
+        // Rejestracja komendy głównej (samorejestracja przez refleksję na CommandMap).
+        new ClassMainCommand(this);
+
+        // TODO: inicjalizacja serwisów / bazy wraz z rozwojem pluginu.
 
         printStartupBanner();
     }
@@ -61,11 +80,38 @@ public class ClassSystemPlugin extends JavaPlugin {
             coloredLogger.infoAlways("> ——————————————————————[ WYŁĄCZANIE " + pluginName + " ]——————————————————————");
         }
 
-        // Zamknięcie pliku logów i odpięcie JUL Handlera — na końcu, po ostatnich logach.
         ErrorLogFileWriter writer = ErrorLogFileWriter.getInstance();
         if (writer != null) {
             writer.shutdown();
         }
+    }
+
+    // ── Wiadomości ────────────────────────────────────────────────────────
+
+    /**
+     * Pobiera pokolorowaną wiadomość z prefiksem (delegacja do {@link ConfigManager}).
+     */
+    public String getMessage(String key, String... replacements) {
+        return configManager.getMessage(key, replacements);
+    }
+
+    /**
+     * Wysyła wiadomość (lub listę) z prefiksem na pierwszej linii. Klucz spod
+     * {@code Translations/*.yml}; replacements jako pary {@code "{token}", wartość}.
+     */
+    public void sendMessage(CommandSender recipient, String messageKey, String... replacements) {
+        if (recipient == null || messageKey == null) return;
+        String prefix = configManager.getMessage("prefix");
+        List<String> lines = configManager.getMessageListNoPrefix(messageKey, replacements);
+        boolean first = true;
+        for (String line : lines) {
+            recipient.sendMessage(first ? prefix + line : line);
+            first = false;
+        }
+    }
+
+    public void sendMessage(Player player, String messageKey, String... replacements) {
+        sendMessage((CommandSender) player, messageKey, replacements);
     }
 
     private void printStartupBanner() {
@@ -81,6 +127,8 @@ public class ClassSystemPlugin extends JavaPlugin {
         coloredLogger.infoAlways("> Informacje o pluginie:");
         coloredLogger.infoAlways(">   • Wersja: " + version);
         coloredLogger.infoAlways(">   • Autorzy: " + authors);
+        coloredLogger.infoAlways(">   • Główna komenda: /" + configManager.getMainCommandName());
+        coloredLogger.infoAlways(">   • Język: " + configManager.getLanguage());
         coloredLogger.infoAlways(">   • Baza danych: " + databaseType);
         coloredLogger.infoAlways("> ");
         coloredLogger.infoAlways("> ——————————————————————[ " + pluginName + " ]——————————————————————");

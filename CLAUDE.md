@@ -29,9 +29,34 @@ Cel pluginu: zarządzanie klasami postaci (skill/role gracza). Szkielet startowy
 
 ## Lifecycle (ClassSystemPlugin)
 
-`ClassSystemPlugin` to obecnie minimalny szkielet (`onEnable`/`onDisable` + singleton `getInstance()`).
-Gdy dojdą serwisy zależne od innych pluginów — stosować staggered init z `runTaskLater` (wzorzec z
-CitySystem). `getInstance()` bezpieczny dopiero po `onEnable` — NIE z `onLoad`/static initializerów.
+Kolejność `onEnable`: `saveDefaultConfig` → `ColoredLogger` → `ErrorLogFileWriter.initialize` →
+`DebugLogger.initialize` → banner → `ConfigMigrator.migrateAll()` (PRZED ConfigManagerem, żeby reszta
+startu pracowała na świeżych plikach) → `ConfigManager.loadConfigs()` → rejestracja `ClassMainCommand`
+→ `printStartupBanner()`. `onDisable`: banner + `ErrorLogFileWriter.shutdown()` na końcu.
+Gdy dojdą serwisy zależne od innych pluginów — staggered init z `runTaskLater` (wzorzec z CitySystem).
+`getInstance()` bezpieczny dopiero po `onEnable` — NIE z `onLoad`/static initializerów.
+
+## Konfiguracja, tłumaczenia, komendy
+
+- **Wiadomości**: zawsze przez `plugin.sendMessage(recipient, "klucz", "{token}", wartość)` lub
+  `plugin.getMessage(...)`. Klucze w `Translations/{pl,en}.yml`. Każda nowa wiadomość — wpis w **obu**
+  plikach (brak w `en.yml` → fallback do `pl.yml`).
+- **Nowy klucz config/translation**: bump `configVersion` w `config.yml` / `Translations/*.yml`, żeby
+  `ConfigMigrator` dolał go u operatorów.
+- **Nowa subkomenda**: (a) klasa `extends AbstractSubcommand` w `commands/subcommands/`, (b) rejestracja
+  w `ClassMainCommand.registerSubcommands()`, (c) `commands.subcommands.<name>.{aliases,description}` w
+  obu `Translations/*.yml`. Permission: `ClassSystem.<name>` (przez `ConfigManager.getCommandPermission`).
+
+## Rejestr helperów (przeczytaj zanim dodasz nowy)
+
+| Helper | Co robi |
+|---|---|
+| `ConfigManager` | Jedyny punkt dostępu do wiadomości (`getMessage`/`getMessageNoPrefix`/listy), kolorów, aliasów/opisów komend, ustawień. |
+| `MessagesConfigLoader` | I/O tłumaczeń + fallback pl.yml. |
+| `ConfigMigrator` | Auto-migracja config.yml + Translations po `configVersion` (deep-merge + backup). |
+| `AbstractCommand` / `AbstractSubcommand` / `Subcommand` | Baza komend (self-register, permission/usage z tłumaczeń). |
+| `ArgumentParser` | `parseInt` / `parsePositiveDouble` / `requireMinArgs` z auto-komunikatem błędu. |
+| `ColoredLogger` / `DebugLogger` / `ErrorLogFileWriter` | Logowanie (patrz docs/ARCHITECTURE.md). |
 
 ## Persistence
 
