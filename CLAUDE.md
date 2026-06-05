@@ -9,6 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **tylko specyfikę ClassSystem**. Gdy reguła jest ogólna (dotyczy też CitySystem) — należy do
 > `../CLAUDE.md`, nie tutaj.
 
+> **Mapa dla AI (zacznij tu):** [`AI_WORKFLOW.md`](AI_WORKFLOW.md) (mapa tego pluginu) + hub
+> [`../AI_WORKFLOW.md`](../AI_WORKFLOW.md). **Aktualizuj `AI_WORKFLOW.md` w tym samym commicie** co zmiana
+> struktury pakietów / komend / permissions / kluczy config / zależności — reguła §13 w [`../CLAUDE.md`](../CLAUDE.md).
+
 ## Project
 
 Paper plugin dla Minecraft 1.21.x, Java 21, Gradle. Kod/komentarze/logi/wartości configu — po polsku;
