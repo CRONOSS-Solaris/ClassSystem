@@ -5,12 +5,6 @@ import cronos.classsystem.utils.DebugLogger;
 import cronos.classsystem.utils.ErrorLogFileWriter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * Główna klasa pluginu ClassSystem — zarządzanie klasami postaci.
- *
- * Logowanie ma ten sam styl co CitySystem (ColoredLogger + DebugLogger +
- * ErrorLogFileWriter, banner startowy i shutdown). Konwencje w CLAUDE.md oraz ../CLAUDE.md.
- */
 public class ClassSystemPlugin extends JavaPlugin {
 
     private static ClassSystemPlugin instance;
@@ -36,7 +30,6 @@ public class ClassSystemPlugin extends JavaPlugin {
         // Zapis domyślnego config.yml zanim cokolwiek czyta debug.enabled.
         saveDefaultConfig();
 
-        // Loggery — ta sama kolejność i schemat co w CitySystem.
         coloredLogger = new ColoredLogger(this);
 
         // Plik-only logger błędów (logs/errors-YYYY-MM-DD.log) + JUL Handler na WARNING+SEVERE.
@@ -75,9 +68,6 @@ public class ClassSystemPlugin extends JavaPlugin {
         }
     }
 
-    /**
-     * Wyświetla banner o uruchomieniu pluginu — ten sam styl ramki co CitySystem.
-     */
     private void printStartupBanner() {
         String pluginName = getDescription().getName();
         String version = getDescription().getVersion();

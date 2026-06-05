@@ -6,11 +6,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * System logów debug dla pluginu Klas.
- * Identyczny schemat co DebugLogger w CitySystem (kategorie, format, singleton),
- * bez metod domenowych specyficznych dla miast.
- */
 public class DebugLogger {
 
     private static DebugLogger instance;

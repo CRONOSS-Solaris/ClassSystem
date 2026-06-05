@@ -4,10 +4,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
 
-/**
- * System kolorowych logów dla pluginu Klas.
- * Identyczny styl i schemat kolorowania co ColoredLogger w CitySystem.
- */
 public class ColoredLogger {
 
     // Kolory ANSI pasujące do pluginu (niebiesko-zielone)
