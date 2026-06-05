@@ -1,0 +1,12 @@
+# Translations (EN) — ClassSystem.
+# Keys: English, dotted hierarchy. A missing key falls back to pl.yml.
+
+prefix: "&8[&bClassSystem&8]&r "
+
+info:
+  reloaded: "Configuration reloaded."
+
+errors:
+  no-permission: "You don't have permission for this command."
+
+commands: {}

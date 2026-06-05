@@ -1,0 +1,10 @@
+name: ClassSystem
+version: ${version}
+main: cronos.classsystem.ClassSystemPlugin
+api-version: 1.21
+authors: [Cronos]
+description: Plugin do zarządzania klasami postaci
+
+dependencies:
+  - name: PlaceholderAPI
+    required: false

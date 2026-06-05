@@ -1,0 +1,27 @@
+# ============================================================
+#  ClassSystem — konfiguracja
+#  Konwencje kluczy: angielskie, hierarchia kropkowa (np. general.language).
+#  Komentarze i wartości tekstowe widoczne dla operatora — po polsku.
+# ============================================================
+
+# 1. Podstawy
+general:
+  # Master switch pluginu.
+  enabled: true
+  # Język plików z Translations/ — 'pl' lub 'en'.
+  language: pl
+
+# 2. Baza danych (ten sam schemat persystencji co CitySystem).
+database:
+  # SQLITE, MYSQL lub MARIADB.
+  type: SQLITE
+  # Prefiks tabel SQL.
+  table-prefix: cls_
+  sqlite:
+    file: data.db
+    journal-mode: WAL
+
+# 3. Debug
+debug:
+  # Verbose logi diagnostyczne. Włączać tylko podczas diagnozy problemu.
+  enabled: false

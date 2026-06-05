@@ -1,0 +1,14 @@
+# Tłumaczenia (PL) — ClassSystem.
+# Klucze: angielskie, hierarchia kropkowa. Wartości: po polsku.
+# Brakujący klucz w aktywnym języku → fallback do pl.yml.
+
+prefix: "&8[&bClassSystem&8]&r "
+
+info:
+  reloaded: "Konfiguracja przeładowana."
+
+errors:
+  no-permission: "Nie masz uprawnień do tej komendy."
+
+# Meta-dane komend — aliasy tłumaczalne (pl: ..., en: ...).
+commands: {}

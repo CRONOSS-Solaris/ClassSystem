@@ -1,0 +1,140 @@
+plugins {
+    id 'java'
+}
+group = 'cronos'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        url = 'https://repo.extendedclip.com/releases/'
+    }
+}
+
+dependencies {
+    compileOnly ("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    implementation ("net.kyori:adventure-platform-bukkit:4.3.2")
+    implementation ("net.kyori:adventure-text-serializer-legacy:4.12.0")
+    implementation ("net.kyori:adventure-api:4.12.0")
+    compileOnly ("me.clip:placeholderapi:2.11.6")
+
+    // Persystencja — ten sam stack co CitySystem (write-behind cache + migracje SQL).
+    implementation ("org.mariadb.jdbc:mariadb-java-client:3.3.3") // MariaDB
+    implementation ("mysql:mysql-connector-java:8.0.33")          // MySQL
+    implementation ("org.xerial:sqlite-jdbc:3.46.0.0")            // SQLite
+    implementation ("com.google.code.gson:gson:2.10.1")           // Gson
+    implementation ("com.zaxxer:HikariCP:5.1.0")                  // HikariCP Connection Pool
+
+    // Lombok
+    compileOnly ("org.projectlombok:lombok:1.18.38")
+    annotationProcessor ("org.projectlombok:lombok:1.18.38")
+    testCompileOnly ("org.projectlombok:lombok:1.18.38")
+    testAnnotationProcessor ("org.projectlombok:lombok:1.18.38")
+
+    // JUnit Jupiter (JUnit 5)
+    testImplementation ("org.junit.jupiter:junit-jupiter:5.11.3")
+    testImplementation ("org.junit.platform:junit-platform-launcher:1.11.3")
+
+    // Mockito - mockito-core (5.x) + junit-jupiter adapter.
+    testImplementation ("org.mockito:mockito-core:5.12.0")
+    testImplementation ("org.mockito:mockito-junit-jupiter:5.12.0")
+
+    // Paper API for tests
+    testImplementation ("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+
+    // MockBukkit - wyłączamy transitive byte-buddy/asm (konflikty wersji)
+    testImplementation('com.github.seeseemelk:MockBukkit-v1.20:3.93.2') {
+        exclude group: 'net.bytebuddy', module: 'byte-buddy'
+        exclude group: 'org.ow2.asm', module: 'asm'
+    }
+
+    testImplementation ("org.assertj:assertj-core:3.26.3")
+}
+
+def targetJavaVersion = 21
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('paper-plugin.yml') {
+        expand props
+    }
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir file('src/integrationTest/java')
+        resources.srcDir file('src/integrationTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter test
+}
+
+check.dependsOn integrationTest
+
+test {
+    useJUnitPlatform()
+    enabled = false
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.text=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt.font=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent.locks=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.net=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED'
+    ]
+}
+
+/*
+ * Force compatible versions of byte-buddy and asm (Mockito 5.x / Java 21).
+ * Te same wersje co w CitySystem — nie bumpować bez testów Mockito.
+ */
+configurations.all {
+    resolutionStrategy {
+        force 'net.bytebuddy:byte-buddy:1.17.8'
+        force 'org.ow2.asm:asm:9.6'
+        force 'org.ow2.asm:asm-tree:9.6'
+        force 'org.ow2.asm:asm-commons:9.6'
+    }
+}

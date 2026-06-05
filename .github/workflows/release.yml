@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # Wersja pluginu jest jedynym źródłem prawdy w build.gradle:5.
+      - name: Read version from build.gradle
+        id: version
+        run: |
+          VERSION=$(grep -E "^version\s*=" build.gradle | head -1 \
+                    | sed -E "s/^version\s*=\s*['\"]([^'\"]+)['\"].*/\1/")
+          if [ -z "$VERSION" ]; then
+            echo "::error::Nie udało się odczytać wersji z build.gradle"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "Wersja: v$VERSION"
+
+      # Idempotencja: jeśli release dla tej wersji już istnieje, pomijamy build.
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" \
+               --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release ${{ steps.version.outputs.tag }} już istnieje — pomijam build."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build
+        if: steps.check.outputs.exists == 'false'
+        run: ./gradlew build --no-daemon --stacktrace
+
+      - name: Validate JAR matches version
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          JAR="build/libs/ClassSystem-${{ steps.version.outputs.version }}.jar"
+          if [ ! -f "$JAR" ]; then
+            echo "::error::Oczekiwany JAR $JAR nie istnieje. Sprawdź build.gradle 'version' i nazwę artefaktu."
+            ls -la build/libs/ || true
+            exit 1
+          fi
+          echo "OK: $JAR"
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ClassSystem ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: build/libs/ClassSystem-*.jar
+          fail_on_unmatched_files: true
