@@ -1,34 +1,57 @@
-# ============================================================
-#  ClassSystem — konfiguracja
-#  Klucze: angielskie, hierarchia kropkowa (np. general.language).
-#  Komentarze i wartości tekstowe widoczne dla operatora — po polsku.
-#
-#  configVersion: NIE edytować ręcznie — ConfigMigrator porównuje je z wersją
-#  w JARze i przy bumpie dolewa nowe klucze, zachowując Twoje ustawienia
-#  (backup zapisywany jako config.yml.backup-<timestamp>).
-# ============================================================
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                                                                           ║
+# ║                          ClassSystem — config.yml                         ║
+# ║                                                                           ║
+# ║   Sekcje (w kolejności):                                                  ║
+# ║                                                                           ║
+# ║     PODSTAWY                                                              ║
+# ║      1. GENERAL          — podstawowe ustawienia pluginu                  ║
+# ║      2. DEBUG            — logowanie diagnostyczne                        ║
+# ║      3. DATABASE         — przechowywanie danych (SQLite/MySQL/MariaDB)   ║
+# ║                                                                           ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+# Wersja schematu konfiguracji. Nie edytuj — automatyczny config-updater pluginu
+# (ConfigMigrator) porównuje to pole z wersją w JARze i przy starcie dolewa nowe
+# klucze, zachowując Twoje wartości. Stary plik trafia do *.backup-{timestamp}.
 configVersion: 0.3.0
 
-# 1. Podstawy
+
+# ════════════════════════════════════════════════════════════════════════════
+#  1. GENERAL — podstawowe ustawienia
+# ════════════════════════════════════════════════════════════════════════════
 general:
-  # Master switch pluginu — false blokuje komendę /klasa.
+  # Czy włączyć plugin (master-switch). false → komenda /klasa zwraca błąd.
   enabled: true
-  # Język plików z Translations/ — 'pl' lub 'en'. Brakujący klucz → fallback do pl.yml.
-  language: pl
 
-# 2. Baza danych (ten sam schemat persystencji co CitySystem).
-database:
-  # SQLITE, MYSQL lub MARIADB.
-  type: SQLITE
-  # Prefiks tabel SQL.
-  table-prefix: cls_
-  sqlite:
-    file: data.db
-    journal-mode: WAL
+  # Język pluginu — wczytuje plik Translations/<language>.yml
+  # Dostępne: pl, en. Brakujący klucz → fallback do pl.yml.
+  language: "pl"
 
-# 3. Debug
+
+# ════════════════════════════════════════════════════════════════════════════
+#  2. DEBUG — logowanie diagnostyczne
+# ════════════════════════════════════════════════════════════════════════════
 debug:
   # Verbose logi diagnostyczne (DebugLogger). Włączać tylko podczas diagnozy problemu.
   enabled: false
+
   # Dodatkowo loguj operacje bazy danych (tylko gdy debug.enabled: true).
   log-database-operations: false
+
+
+# ════════════════════════════════════════════════════════════════════════════
+#  3. DATABASE — przechowywanie danych
+# ════════════════════════════════════════════════════════════════════════════
+database:
+  # Typ bazy: SQLITE, MYSQL lub MARIADB.
+  type: "SQLITE"
+
+  # Prefiks tabel SQL.
+  table-prefix: "cls_"
+
+  # ── SQLite ──────────────────────────────────────────────────────────────
+  sqlite:
+    file: "data.db"
+    journal-mode: "WAL"

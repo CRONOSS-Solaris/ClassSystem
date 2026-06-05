@@ -1,21 +1,26 @@
-# Translations (EN) — ClassSystem.
-# Keys: English, dotted hierarchy. A missing key falls back to pl.yml.
-# configVersion: do not edit manually (ConfigMigrator merges new keys on bump).
+# Wersja schematu tłumaczeń. Nie edytuj — automatyczny config-updater pluginu
+# (ConfigMigrator) dolewa nowe klucze przy starcie, zachowując Twoje teksty.
+# Stary plik trafia do *.backup-{timestamp}.
 configVersion: 0.3.0
 
-prefix: "&8[&bClassSystem&8]&r "
+# Prefiks doklejany do pierwszej linii wiadomości (plugin.sendMessage).
+prefix: '&bClassSystem &7&l» '
 
+# info - komunikaty informacyjne
 info:
   reloaded: "&aConfiguration reloaded."
-  help-header: "&8——————[ &bClassSystem &8]——————"
+  help-header: "&8──── &bClassSystem &8────"
+  # {usage} = e.g. /klasa reload, {description} = subcommand description
   help-entry: "&e{usage} &7- &f{description}"
 
+# errors - validation and runtime errors
 errors:
   no-permission-command: "&cYou don't have permission for this command."
   system-disabled: "&cThe class system is currently disabled."
   invalid-arguments: "&cInvalid arguments. Use &e/klasa help&c."
   internal-error: "&cAn internal error occurred. Check the console / logs."
 
+# commands - command metadata. Aliases are translatable (first = name shown in usage).
 commands:
   main: klasa
   aliases:

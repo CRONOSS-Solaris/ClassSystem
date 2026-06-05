@@ -127,7 +127,6 @@ public class ClassSystemPlugin extends JavaPlugin {
         coloredLogger.infoAlways("> Informacje o pluginie:");
         coloredLogger.infoAlways(">   • Wersja: " + version);
         coloredLogger.infoAlways(">   • Autorzy: " + authors);
-        coloredLogger.infoAlways(">   • Główna komenda: /" + configManager.getMainCommandName());
         coloredLogger.infoAlways(">   • Język: " + configManager.getLanguage());
         coloredLogger.infoAlways(">   • Baza danych: " + databaseType);
         coloredLogger.infoAlways("> ");
