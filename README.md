@@ -6,7 +6,7 @@ CitySystem, opisany w [`CLAUDE.md`](CLAUDE.md) oraz wspólnym [`../CLAUDE.md`](.
 
 | | |
 |---|---|
-| **Wersja** | 0.1.0 |
+| **Wersja** | 0.2.0 |
 | **Platforma** | Paper 1.21.x |
 | **Java** | 21 |
 | **Plik wtyczki** | `paper-plugin.yml` (Paper plugin loader) |

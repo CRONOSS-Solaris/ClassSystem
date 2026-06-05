@@ -33,14 +33,28 @@ Drzewo pakietów `cronos.classsystem.*` (rośnie wraz z funkcjami; konwencja war
 
 ```
 cronos.classsystem
-└── ClassSystemPlugin        — główna klasa, lifecycle + singleton getInstance()
+├── ClassSystemPlugin        — główna klasa, lifecycle + singleton getInstance()
+└── utils/
+    ├── ColoredLogger        — kolorowe logi ANSI (banner, sekcje, statusy ✓/✗/⚠)
+    ├── DebugLogger          — verbose diagnostyka gated debug.enabled (singleton, kategorie)
+    └── ErrorLogFileWriter   — plik-only logger błędów (logs/errors-YYYY-MM-DD.log) + JUL Handler
 ```
 
 ## 2. Lifecycle pluginu
 
-`ClassSystemPlugin.onEnable` ustawia singleton i loguje start; `onDisable` loguje stop. Brak na razie
-serwisów, bazy, schedulerów. Gdy dojdą — kolejność init/teardown i staggered delays wzorować na
-`CitySystem/docs/ARCHITECTURE.md` (sekcja Lifecycle).
+`ClassSystemPlugin.onEnable`: `saveDefaultConfig()` → `ColoredLogger` → `ErrorLogFileWriter.initialize`
+→ `DebugLogger.initialize` → banner startowy (`=== URUCHAMIANIE PLUGINU KLAS ===` + ramka
+`> ——[ ClassSystem ]——`). `onDisable`: banner wyłączania + `ErrorLogFileWriter.shutdown()` na końcu.
+Brak na razie serwisów, bazy, schedulerów. Gdy dojdą — kolejność init/teardown i staggered delays
+wzorować na `CitySystem/docs/ARCHITECTURE.md` (sekcja Lifecycle).
+
+### Logowanie (ten sam schemat co CitySystem)
+
+| Logger | Zastosowanie |
+|---|---|
+| `ColoredLogger` | User-facing INFO/WARN/SEVERE z ANSI. `infoIfNotDebug()` (cicho gdy debug on), `infoAlways()` (banner). |
+| `DebugLogger` | Verbose diagnostyka gated `debug.enabled`; `debugService/Command/Event/Database/...`, `debugException`. |
+| `ErrorLogFileWriter` | Plik-only `logs/errors-YYYY-MM-DD.log`: łapie WARNING+SEVERE z `plugin.getLogger()` (JUL Handler) oraz wszystkie `DebugLogger.debugException` (zawsze, niezależnie od `debug.enabled`). Dzienna rotacja, append, thread-safe. |
 
 ## 3. Build i CI
 
